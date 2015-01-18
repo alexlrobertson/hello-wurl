@@ -20,10 +20,6 @@ function initSynth() {
   window.speechSynthesis.onvoiceschanged = onVoicesChanged;
 }
 
-function onRecogResult(event) {
-  console.log("%c" + event.results[event.results.length - 1][0].transcript, "color: blue");
-}
-
 function onRecogStart() {
   console.log("Recog started");
 }
@@ -32,18 +28,18 @@ function onRecogError() {
   console.log(arguments);
 }
 
-function initRecog() {
+function initRecog(options) {
   console.log("Recog starting");
 
-  getRecog()
+  getRecog(options)
     .start();
 }
 
-function getRecog() {
+function getRecog(options) {
   var recog = new webkitSpeechRecognition();
 
   recog.continuous = true;
-  recog.onresult = onRecogResult;
+  recog.onresult = options.onResults;
   recog.onstart = onRecogStart;
   recog.onerror = onRecogError;
   recog.onend = initRecog;
@@ -51,5 +47,23 @@ function getRecog() {
   return recog;
 }
 
-initRecog();
+function onResults(event) {
+  if (!event.results || event.results.length === 0) {
+    return;
+  }
+
+  _.each(event.results, eachResult);
+}
+
+function eachResult(result) {
+  _.each(result, eachAlternative);
+}
+
+function eachAlternative(alternative) {
+  console.log(alternative);
+}
+
+initRecog({
+  onResults: onResults
+});
 initSynth();
